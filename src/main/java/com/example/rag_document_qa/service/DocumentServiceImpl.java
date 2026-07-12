@@ -2,7 +2,9 @@ package com.example.rag_document_qa.service;
 
 import com.example.rag_document_qa.dto.DocumentResponse;
 import com.example.rag_document_qa.entity.Document;
+import com.example.rag_document_qa.entity.DocumentChunk;
 import com.example.rag_document_qa.enums.DocumentStatus;
+import com.example.rag_document_qa.repository.DocumentChunkRepository;
 import com.example.rag_document_qa.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,7 +24,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final PdfExtractionService pdfExtractionService;
     private final DocumentRepository documentRepository;
-
+    private final ChunkingService chunkingService;
+    private final DocumentChunkRepository documentChunkRepository;
     private static final String UPLOAD_DIR = "uploads";
 
     @Override
@@ -60,6 +64,19 @@ public class DocumentServiceImpl implements DocumentService {
                     .build();
 
             Document saved = documentRepository.save(document);
+
+            List<String> chunks = chunkingService.chunkText(extractedText);
+
+            for (int i = 0; i < chunks.size(); i++) {
+
+                DocumentChunk chunk = DocumentChunk.builder()
+                        .chunkIndex(i)
+                        .content(chunks.get(i))
+                        .document(saved)
+                        .build();
+
+                documentChunkRepository.save(chunk);
+            }
 
             return DocumentResponse.builder()
                     .id(saved.getId())

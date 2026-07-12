@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "documents")
@@ -37,4 +39,9 @@ public class Document {
 
     @Column(nullable = false)
     private LocalDateTime uploadedAt;
+
+    @OneToMany(mappedBy = "document",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<DocumentChunk> chunks = new ArrayList<>();
 }
