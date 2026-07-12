@@ -1,6 +1,5 @@
 package com.example.rag_document_qa.service;
 
-
 import com.example.rag_document_qa.dto.DocumentResponse;
 import com.example.rag_document_qa.entity.Document;
 import com.example.rag_document_qa.enums.DocumentStatus;
@@ -20,7 +19,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    private final DocumentRepository repository;
+    private final PdfExtractionService pdfExtractionService;
+    private final DocumentRepository documentRepository;
 
     private static final String UPLOAD_DIR = "uploads";
 
@@ -29,26 +29,37 @@ public class DocumentServiceImpl implements DocumentService {
 
         try {
 
+            // Create uploads directory if it doesn't exist
             Files.createDirectories(Paths.get(UPLOAD_DIR));
 
-            String uniqueFileName =
-                    UUID.randomUUID() + "_" + file.getOriginalFilename();
+            // Generate unique file name
+            String uniqueFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 
-            Path filePath =
-                    Paths.get(UPLOAD_DIR, uniqueFileName);
+            // Destination path
+            Path filePath = Paths.get(UPLOAD_DIR, uniqueFileName);
 
+            // Save PDF to uploads folder
             Files.copy(file.getInputStream(), filePath);
 
+            // Extract text from PDF
+            String extractedText = pdfExtractionService.extractText(filePath.toFile());
+
+            // Temporary verification
+            System.out.println(" Extracted Text");
+            System.out.println(extractedText);
+            System.out.println("...................");
+
+            // Save document metadata
             Document document = Document.builder()
                     .fileName(file.getOriginalFilename())
                     .filePath(filePath.toString())
                     .contentType(file.getContentType())
                     .fileSize(file.getSize())
-                    .status(DocumentStatus.UPLOADING)
+                    .status(DocumentStatus.PROCESSING)
                     .uploadedAt(LocalDateTime.now())
                     .build();
 
-            Document saved = repository.save(document);
+            Document saved = documentRepository.save(document);
 
             return DocumentResponse.builder()
                     .id(saved.getId())

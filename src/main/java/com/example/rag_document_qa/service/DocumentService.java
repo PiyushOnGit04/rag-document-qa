@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface DocumentService {
 
+
     DocumentResponse uploadDocument(MultipartFile file);
 
 }
