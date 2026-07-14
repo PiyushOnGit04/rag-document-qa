@@ -9,6 +9,7 @@ import com.example.rag_document_qa.repository.DocumentRepository;
 import dev.langchain4j.data.embedding.Embedding;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -16,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +32,7 @@ public class DocumentServiceImpl implements DocumentService {
     private static final String UPLOAD_DIR = "uploads";
 
     @Override
+    @Transactional
     public DocumentResponse uploadDocument(MultipartFile file) {
 
         try {
@@ -51,11 +52,6 @@ public class DocumentServiceImpl implements DocumentService {
             // Extract text from PDF
             String extractedText = pdfExtractionService.extractText(filePath.toFile());
 
-            // Temporary verification
-            System.out.println(" Extracted Text");
-            System.out.println(extractedText);
-            System.out.println("...................");
-
             // Save document metadata
             Document document = Document.builder()
                     .fileName(file.getOriginalFilename())
@@ -70,23 +66,22 @@ public class DocumentServiceImpl implements DocumentService {
 
             List<String> chunks = chunkingService.chunkText(extractedText);
 
-            Embedding embedding = embeddingService.generateEmbedding(chunks.get(0));
-
-            System.out.println("Embedding Dimension: " + embedding.vector().length);
-
-            System.out.println("Embedding Vector:");
-            System.out.println(Arrays.toString(embedding.vector()));
-
             for (int i = 0; i < chunks.size(); i++) {
+
+                Embedding embedding = embeddingService.generateEmbedding(chunks.get(i));
 
                 DocumentChunk chunk = DocumentChunk.builder()
                         .chunkIndex(i)
                         .content(chunks.get(i))
+                        .embedding(embedding.vector())
                         .document(saved)
                         .build();
 
                 documentChunkRepository.save(chunk);
             }
+
+            saved.setStatus(DocumentStatus.COMPLETED);
+            documentRepository.save(saved);
 
             return DocumentResponse.builder()
                     .id(saved.getId())
