@@ -6,6 +6,7 @@ import com.example.rag_document_qa.entity.DocumentChunk;
 import com.example.rag_document_qa.enums.DocumentStatus;
 import com.example.rag_document_qa.repository.DocumentChunkRepository;
 import com.example.rag_document_qa.repository.DocumentRepository;
+import dev.langchain4j.data.embedding.Embedding;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +28,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final ChunkingService chunkingService;
     private final DocumentChunkRepository documentChunkRepository;
+    private final EmbeddingService embeddingService;
     private static final String UPLOAD_DIR = "uploads";
 
     @Override
@@ -66,6 +69,13 @@ public class DocumentServiceImpl implements DocumentService {
             Document saved = documentRepository.save(document);
 
             List<String> chunks = chunkingService.chunkText(extractedText);
+
+            Embedding embedding = embeddingService.generateEmbedding(chunks.get(0));
+
+            System.out.println("Embedding Dimension: " + embedding.vector().length);
+
+            System.out.println("Embedding Vector:");
+            System.out.println(Arrays.toString(embedding.vector()));
 
             for (int i = 0; i < chunks.size(); i++) {
 
