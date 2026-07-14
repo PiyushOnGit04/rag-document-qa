@@ -64,10 +64,18 @@ public class DocumentServiceImpl implements DocumentService {
 
             Document saved = documentRepository.save(document);
 
-            List<String> chunks = chunkingService.chunkText(extractedText);
+            List<String> chunks = chunkingService.chunkText(extractedText)
+                    .stream()
+                    .filter(c -> c != null && !c.isBlank())
+                    .toList();
+
+            if (chunks.isEmpty()) {
+                saved.setStatus(DocumentStatus.FAILED); // or whatever status fits
+                documentRepository.save(saved);
+                throw new RuntimeException("No extractable text found in document.");
+            }
 
             for (int i = 0; i < chunks.size(); i++) {
-
                 Embedding embedding = embeddingService.generateEmbedding(chunks.get(i));
 
                 DocumentChunk chunk = DocumentChunk.builder()

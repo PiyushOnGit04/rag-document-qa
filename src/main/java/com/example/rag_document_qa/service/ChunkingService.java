@@ -14,6 +14,10 @@ public class ChunkingService {
 
         List<String> chunks = new ArrayList<>();
 
+        if (text == null || text.isBlank()) {
+            return chunks; // empty list — nothing to chunk
+        }
+
         for (int i = 0; i < text.length(); i += CHUNK_SIZE) {
 
             int end = Math.min(i + CHUNK_SIZE, text.length());
@@ -21,6 +25,9 @@ public class ChunkingService {
             chunks.add(text.substring(i, end));
         }
 
-        return chunks;
+        return chunks.stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 }
