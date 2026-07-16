@@ -63,7 +63,9 @@ public class QueryServiceImpl implements QueryService {
 
         return QueryResponse.builder()
                 .answer(answer)
-                .sourceChunks(nearestChunks.stream().map(DocumentChunk::getContent).toList())
+                .sourceChunks(nearestChunks.stream()
+                        .map(c -> c.getDocument().getFileName() + " (chunk " + c.getChunkIndex() + ")")
+                        .toList())
                 .build();
     }
 

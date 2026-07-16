@@ -17,10 +17,21 @@ public class PdfExtractionService {
 
             PDFTextStripper stripper = new PDFTextStripper();
 
-            return stripper.getText(document);
+            String rawText = stripper.getText(document);
+
+            return normalizeWhitespace(rawText);
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to extract text from PDF: " + file.getName(), e);
         }
+    }
+
+    private String normalizeWhitespace(String text) {
+        return text
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
+                .replaceAll("[ \\t]+", " ")      // collapse repeated spaces/tabs
+                .replaceAll("\\n{3,}", "\n\n")   // collapse 3+ blank lines to one
+                .trim();
     }
 }
