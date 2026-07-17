@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-//@CrossOrigin(origins = "*")
+import java.util.List;
+
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
@@ -22,4 +24,18 @@ public class DocumentController {
         return ResponseEntity.ok(documentService.uploadDocument(file));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable long id
+    ) {
+        documentService.deleteDocument(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DocumentResponse>> getAll() {
+
+        return ResponseEntity.ok(documentService.getAllDocuments());
+    }
 }
