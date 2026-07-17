@@ -21,7 +21,7 @@ public class ChatModelConfig {
                 .baseUrl("https://api.groq.com/openai/v1")
                 .apiKey(apiKey)
                 .modelName(modelName)
-                .temperature(0.0)
+                .temperature(0.3)
                 .build();
     }
 }

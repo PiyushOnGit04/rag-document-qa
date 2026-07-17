@@ -104,4 +104,29 @@ public class DocumentServiceImpl implements DocumentService {
             throw new RuntimeException("Failed to upload document.", e);
         }
     }
+    public void deleteDocument(long id){
+        Document document = documentRepository.findById(id)
+                        .orElseThrow(()-> new RuntimeException("Document Not Found"));
+        try {
+            Files.deleteIfExists(Paths.get(document.getFilePath()));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file from disk: " + document.getFilePath(), e);
+        }
+        documentRepository.delete(document);
+    }
+
+    @Override
+    public List<DocumentResponse> getAllDocuments() {
+
+        return documentRepository.findAll().stream()
+                .map(doc -> DocumentResponse.builder()
+                        .id(doc.getId())
+                        .fileName(doc.getFileName())
+                        .contentType(doc.getContentType())
+                        .fileSize(doc.getFileSize())
+                        .status(doc.getStatus())
+                        .uploadedAt(doc.getUploadedAt())
+                        .build())
+                .toList();
+    }
 }

@@ -5,7 +5,7 @@ import com.example.rag_document_qa.service.QueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-//@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/query")
 @RequiredArgsConstructor
