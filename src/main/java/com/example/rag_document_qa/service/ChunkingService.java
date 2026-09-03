@@ -8,7 +8,7 @@ import java.util.List;
 @Service
 public class ChunkingService {
 
-    private static final int CHUNK_SIZE = 500;
+    private static final int CHUNK_SIZE = 5000;
 
     public List<String> chunkText(String text) {
 
