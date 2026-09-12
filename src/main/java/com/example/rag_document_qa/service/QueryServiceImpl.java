@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QueryServiceImpl implements QueryService {
 
-    private static final int TOP_K = 5;
+    private static final int TOP_K = 4;
 
     private final EmbeddingService embeddingService;
     private final DocumentChunkRepository documentChunkRepository;
